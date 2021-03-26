@@ -1,10 +1,11 @@
 import pickle
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 
 class Recommendations:
 
     def __init__(self, delta=1, force_reread_flag=False):
+        self.recommend_item = namedtuple('recommend', ['rank', 'recommends_tuple'])
         self.pickle_filename = 'pickle1' + '.pickle'
         self.delta = None if delta == 1 else delta
         self._recommendation_dict = {}
@@ -26,9 +27,10 @@ class Recommendations:
         else:
             return {key: value for key, value in self._recommendation_dict[sku].items()}
 
-    def sort_all_recommendations(self):
+    def convert_recommendations(self):
         for key in self._recommendation_dict:
-            self._recommendation_dict[key] = sorted(self._recommendation_dict[key].items())
+            for ordered_key in self._recommendation_dict[key]:
+                self._recommendation_dict[key][ordered_key] = tuple(self._recommendation_dict[key][ordered_key])
 
     def __contains__(self, item):
         return item in self._recommendation_dict
@@ -52,6 +54,7 @@ class Recommendations:
 
                 self.append_recommendation(sku, rank, recommend_sku)
 
+        self.convert_recommendations()
         self.write_to_pickle()
 
     def read_recommendation(self, force_reread_flag=False):
