@@ -1,11 +1,19 @@
 import pickle
 from collections import OrderedDict, namedtuple
+from typing import NamedTuple
 
+
+class RecordRecommend(NamedTuple):
+    rank: float
+    recommends_tuple: tuple
+
+
+# recommend_item = namedtuple('recommend_item', ['rank', 'recommends_tuple'])
 
 class Recommendations:
 
     def __init__(self, delta=1, force_reread_flag=False):
-        self.recommend_item = namedtuple('recommend', ['rank', 'recommends_tuple'])
+        # self.recommend_item = namedtuple('recommend_item', ['rank', 'recommends_tuple'])
         self.pickle_filename = 'pickle1' + '.pickle'
         self.delta = None if delta == 1 else delta
         self._recommendation_dict = {}
@@ -22,15 +30,15 @@ class Recommendations:
 
     def get_recommendations(self, sku):
         if self.delta is not None:
-            return {key: self._recommendation_dict[sku][key] for key in self._recommendation_dict[sku].keys() if
-                    key >= 1 - self.delta}
+            return tuple(line for line in self._recommendation_dict[sku] if line.rank >= 1 - self.delta)
         else:
-            return {key: value for key, value in self._recommendation_dict[sku].items()}
+            return self._recommendation_dict[sku]
 
     def convert_recommendations(self):
-        for key in self._recommendation_dict:
-            for ordered_key in self._recommendation_dict[key]:
-                self._recommendation_dict[key][ordered_key] = tuple(self._recommendation_dict[key][ordered_key])
+        for key in self._recommendation_dict.keys():
+            self._recommendation_dict[key] = tuple(
+                RecordRecommend(ordered_key, tuple(self._recommendation_dict[key][ordered_key])) for ordered_key in
+                self._recommendation_dict[key].keys())
 
     def __contains__(self, item):
         return item in self._recommendation_dict
