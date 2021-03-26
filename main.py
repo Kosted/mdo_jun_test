@@ -22,7 +22,7 @@ if __name__ == "__main__":
     delta = float(get_env("DELTA", 1.0))
     hostName = get_env("HOSTNAME", 'localhost')
     serverPort = int(get_env("SERVERPORT", 8000))
-    force_reread_flag = bool(get_env("FORSE_REREAD_FLAG", False))
+    force_reread_flag = bool(get_env("FORCE_REREAD_FLAG", False))
 
     server = HttpServer(hostName, serverPort, delta, force_reread_flag)
 
